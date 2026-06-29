@@ -35,22 +35,26 @@ def power_amplifier(base_spell: Callable, multiplier: int) -> Callable:
     return amplified
 
 
-def condition_test(state: bool) -> bool:
-    if state:
+def condition_test(power: int) -> bool:
+    if power >= 5:
         return True
     return False
 
 
 def conditional_caster(condition: Callable, spell: Callable) -> Callable:
     def casters(*args) -> str:
-        if condition(*args):
+        if condition(args[1]):
             return spell(*args)
         return "Spell fizzled"
 
+    return casters
 
-if __name__ == "__main__":
-    function: Callable = spell_combiner(fire, freeze)
-    print(function("chips", 4))
 
-    function2: Callable = power_amplifier(lighting, 3)
-    print(function2("chips", 6))
+def spell_sequence(spells: list[Callable]) -> Callable:
+    def sequence(*args) -> list[str]:
+        spell_list: list[str] = []
+        for x in spells:
+            spell_list.append(x(*args))
+        return spell_list
+
+    return sequence
