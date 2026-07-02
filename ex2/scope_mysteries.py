@@ -86,7 +86,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(e)
 
-    print("Testing memory vault...")
+    print("\nTesting memory vault...")
     try:
         vault: dict[str, Callable] = memory_vault()
         print("Store 'secret' = 42")
