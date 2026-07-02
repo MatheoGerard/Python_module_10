@@ -1,15 +1,16 @@
 import operator as op
-import functools as ft
+from functools import partial, reduce, lru_cache, singledispatch
 from collections.abc import Callable
+from typing import Any
 
 
 def spell_reducer(spells: list[int], operation: str) -> int:
     if len(spells) == 0:
         return 0
     if operation == "add":
-        return ft.reduce(op.add, spells)
+        return reduce(op.add, spells)
     elif operation == "multiply":
-        return ft.reduce(op.mul, spells)
+        return reduce(op.mul, spells)
     elif operation == "max":
         return max(spells)
     elif operation == "min":
@@ -24,15 +25,47 @@ def base(power: int, element: str, target: str) -> str:
 
 def partial_enchanter(base_enchantment: Callable) -> dict[str, Callable]:
     return {
-        "fire": ft.partial(base_enchantment, power=50, element="fire"),
-        "freeze": ft.partial(base_enchantment, power=50, element="freeze"),
-        "poison": ft.partial(base_enchantment, power=50, element="poison"),
+        "fire": partial(base_enchantment, power=50, element="fire"),
+        "freeze": partial(base_enchantment, power=50, element="freeze"),
+        "poison": partial(base_enchantment, power=50, element="poison"),
     }
 
 
+@lru_cache
+def memoized_fibonacci(n: int) -> int:
+    if n < 2:
+        return n
+    return memoized_fibonacci(n - 1) + memoized_fibonacci(n - 2)
+
+
+def spell_dispatcher() -> Callable[[Any], str]:
+    @singledispatch
+    def dispatch(spell: Any) -> str:
+        return f"unknown spell type: {spell}"
+
+    @dispatch.register
+    def _(spell: int) -> str:
+        return f"Damage spell: {spell} damage"
+
+    @dispatch.register
+    def _(spell: str) -> str:
+        return f"Enchantment: {spell}"
+
+    @dispatch.register
+    def _(spell: list) -> str:
+        return f"Multi-cast: {len(spell)} spells"
+
+    return dispatch
+
+
 if __name__ == "__main__":
-    try:
-        spells: list[int] = [20, 5, 8, 2]
-        print(spell_reducer(spells, "min"))
-    except Exception as e:
-        print(e)
+    print(memoized_fibonacci(0))
+    print(memoized_fibonacci.cache_info())
+    print(memoized_fibonacci(1))
+    print(memoized_fibonacci.cache_info())
+    print(memoized_fibonacci(10))
+    print(memoized_fibonacci.cache_info())
+    print(memoized_fibonacci(15))
+    print(memoized_fibonacci.cache_info())
+    print(memoized_fibonacci(15))
+    print(memoized_fibonacci.cache_info())
