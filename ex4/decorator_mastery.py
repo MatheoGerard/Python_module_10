@@ -9,6 +9,9 @@ def fire() -> str:
 
 
 def spell_timer(func: Callable) -> Callable:
+    if not callable(func):
+        raise TypeError("func must be callable")
+
     @wraps(func)
     def wrapper(*args, **kwargs) -> str:
         print(f"Casting {func.__name__}...")
@@ -23,6 +26,9 @@ def spell_timer(func: Callable) -> Callable:
 
 if __name__ == "__main__":
     print("Testing spell timer...")
-    wrap: Callable = spell_timer(fire)
-    return_str: str = wrap()
-    print(f"Result: {return_str}!")
+    try:
+        wrap: Callable = spell_timer(fire)
+        return_str: str = wrap()
+        print(f"Result: {return_str}!")
+    except Exception as e:
+        print(e)
