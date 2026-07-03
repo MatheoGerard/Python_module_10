@@ -70,8 +70,10 @@ def retry_spell(max_attempts: int) -> Callable:
 class MageGuild:
     @staticmethod
     def validate_mage_name(name) -> bool:
-        # TODO: Check if the conditions for the name is respected
-        pass
+        if not isinstance(name, str):
+            raise TypeError("name must be a str")
+        if len(name) < 3:
+            raise ValueError("name must be at least 3 characters long.")
 
 
 if __name__ == "__main__":
