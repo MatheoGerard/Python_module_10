@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from functools import wraps
 import time
+from typing import Type
 
 
 def fire() -> str:
@@ -31,7 +32,11 @@ def power_validator(min_power: int) -> Callable:
     def deco(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            power: int = args[0]
+            power: int
+            if len(args) == 3:
+                power = args[2]
+            else:
+                power = args[0]
             if power < min_power:
                 return "Insufficient power for this spell"
             else:
@@ -69,11 +74,24 @@ def retry_spell(max_attempts: int) -> Callable:
 
 class MageGuild:
     @staticmethod
-    def validate_mage_name(name) -> bool:
+    def validate_mage_name(name: str) -> bool:
         if not isinstance(name, str):
-            raise TypeError("name must be a str")
+            raise TypeError("mane must be a str")
         if len(name) < 3:
-            raise ValueError("name must be at least 3 characters long.")
+            return False
+        for char in name:
+            if not char.isalpha() and not char == " ":
+                return False
+        return True
+
+    @power_validator(10)
+    def cast_spell(self, spell_name: str, power: int) -> str:
+        if not isinstance(spell_name, str):
+            raise TypeError("spell_name must be a str")
+        if not isinstance(power, int):
+            raise TypeError("power must be an int")
+
+        return f"Successfully cast {spell_name} with {power} power"
 
 
 if __name__ == "__main__":
