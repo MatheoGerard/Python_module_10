@@ -1,7 +1,6 @@
 from collections.abc import Callable
 from functools import wraps
 import time
-from typing import Type
 
 
 def fire() -> str:
@@ -47,13 +46,6 @@ def power_validator(min_power: int) -> Callable:
     return deco
 
 
-def test(n: int) -> str:
-    if n != 2:
-        raise ValueError("RATER")
-    else:
-        return f"Pass in {n} try"
-
-
 def retry_spell(max_attempts: int) -> Callable:
     def deco(func: Callable) -> Callable:
         @wraps(func)
@@ -70,6 +62,22 @@ def retry_spell(max_attempts: int) -> Callable:
         return wrapper
 
     return deco
+
+
+def make_test() -> Callable:
+    n: int = 0
+
+    @retry_spell(2)
+    def test() -> str:
+        nonlocal n
+        n += 1
+
+        if n != 3:
+            raise ValueError("RATER")
+        else:
+            return f"Pass in {n} try"
+
+    return test
 
 
 class MageGuild:
@@ -102,3 +110,14 @@ if __name__ == "__main__":
         print(f"Result: {return_str}!")
     except Exception as e:
         print(e)
+
+    print("\nTesting retrying spell...")
+    tester: Callable = make_test()
+    print(tester())
+
+    print("\nTesting MageGuild...")
+    guild: MageGuild = MageGuild()
+    print(guild.validate_mage_name("Arthur guild"))
+    print(guild.validate_mage_name("Arthur guild 42"))
+    print(guild.cast_spell("FireBall", 15))
+    print(guild.cast_spell("FireBall", 8))
