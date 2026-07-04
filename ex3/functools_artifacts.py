@@ -62,7 +62,7 @@ def spell_dispatcher() -> Callable[[Any], str]:
         return f"Enchantment: {spell}"
 
     @dispatch.register
-    def _(spell: list) -> str:
+    def _(spell: list[Any]) -> str:
         return f"Multi-cast: {len(spell)} spells"
 
     return dispatch
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     print("\nTesting partial enchanter...")
     try:
-        magic_book: dict = partial_enchanter(base)
+        magic_book: dict[str, Callable] = partial_enchanter(base)
         fire_spell: Callable = magic_book["fire"]
         freeze_spell: Callable = magic_book["freeze"]
         poison_spell: Callable = magic_book["poison"]

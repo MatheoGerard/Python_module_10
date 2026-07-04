@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from functools import wraps
 import time
+from typing import Any
 
 
 def fire() -> str:
@@ -13,7 +14,7 @@ def spell_timer(func: Callable) -> Callable:
         raise TypeError("func must be callable")
 
     @wraps(func)
-    def wrapper(*args, **kwargs) -> str:
+    def wrapper(*args: Any, **kwargs: Any) -> str:
         print(f"Casting {func.__name__}...")
         start: float = time.time()
         res: str = func(*args, **kwargs)
@@ -28,9 +29,9 @@ def power_validator(min_power: int) -> Callable:
     if not isinstance(min_power, int):
         raise TypeError("min_power must be an int")
 
-    def deco(func: Callable):
+    def deco(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Callable | str:
             power: int
             if len(args) == 3:
                 power = args[2]
@@ -49,13 +50,14 @@ def power_validator(min_power: int) -> Callable:
 def retry_spell(max_attempts: int) -> Callable:
     def deco(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> str:
+        def wrapper(*args: Any, **kwargs: Any) -> Callable | str:
             for x in range(0, max_attempts):
                 try:
                     return func(*args, **kwargs)
                 except Exception:
                     print(
-                        f"Spell failed, retrying... (attempt {x + 1}/{max_attempts})"
+                        "Spell failed, retrying... "
+                        f"(attempt {x + 1}/{max_attempts})"
                     )
             return f"Spell casting failed after {max_attempts} attempts"
 

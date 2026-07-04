@@ -44,12 +44,12 @@ def enchantment_factory(enchantment_type: str) -> Callable:
 def memory_vault() -> dict[str, Callable]:
     storage: dict[str, Callable] = {}
 
-    def store(key: str, value: Any):
+    def store(key: str, value: Any) -> None:
         if not isinstance(key, str):
             raise TypeError("key must be a str")
         storage.update({key: value})
 
-    def recall(key: str):
+    def recall(key: str) -> Any:
         if not isinstance(key, str):
             raise TypeError("key must be a str")
         if key in storage.keys():

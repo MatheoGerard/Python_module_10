@@ -109,7 +109,8 @@ if __name__ == "__main__":
         combiner: Callable = spell_combiner(poison, fire)
         combined_spell: tuple[str, str] = combiner("Dragon", 67)
         print(
-            f"Combined spell result: {combined_spell[0]}, {combined_spell[1]}"
+            f"Combined spell result: > Callable{combined_spell[0]}, "
+            f"{combined_spell[1]}"
         )
     except Exception as e:
         print(e)
