@@ -29,13 +29,15 @@ def base(power: int, element: str, target: str) -> str:
     return f"Launch a {element} sort and do {power} damage to {target}!"
 
 
-def partial_enchanter(base_enchantment: Callable) -> dict[str, Callable]:
+def partial_enchanter(
+    base_enchantment: Callable[[int, str, str], str],
+) -> dict[str, Callable[[str], str]]:
     if not callable(base_enchantment):
         raise TypeError("base_enchantment must be callable")
     return {
-        "fire": partial(base_enchantment, power=50, element="fire"),
-        "freeze": partial(base_enchantment, power=50, element="freeze"),
-        "poison": partial(base_enchantment, power=50, element="poison"),
+        "fire": partial(base_enchantment, 50, "fire"),
+        "freeze": partial(base_enchantment, 50, "freeze"),
+        "poison": partial(base_enchantment, 50, "poison"),
     }
 
 
@@ -61,7 +63,7 @@ def spell_dispatcher() -> Callable[[Any], str]:
     def _(spell: str) -> str:
         return f"Enchantment: {spell}"
 
-    @dispatch.register
+    @dispatch.register(list)
     def _(spell: list[Any]) -> str:
         return f"Multi-cast: {len(spell)} spells"
 
@@ -80,14 +82,14 @@ if __name__ == "__main__":
 
     print("\nTesting partial enchanter...")
     try:
-        magic_book: dict[str, Callable] = partial_enchanter(base)
-        fire_spell: Callable = magic_book["fire"]
-        freeze_spell: Callable = magic_book["freeze"]
-        poison_spell: Callable = magic_book["poison"]
+        magic_book: dict[str, Callable[[str], str]] = partial_enchanter(base)
+        fire_spell: Callable[[str], str] = magic_book["fire"]
+        freeze_spell: Callable[[str], str] = magic_book["freeze"]
+        poison_spell: Callable[[str], str] = magic_book["poison"]
 
-        print(fire_spell(target="goblin"))
-        print(freeze_spell(target="dragon"))
-        print(poison_spell(target="zombie"))
+        print(fire_spell("goblin"))
+        print(freeze_spell("dragon"))
+        print(poison_spell("zombie"))
     except Exception as e:
         print(e)
 
@@ -101,7 +103,7 @@ if __name__ == "__main__":
         print(e)
 
     print("\nTesting spell dispatcher...")
-    dispatcher: Callable = spell_dispatcher()
+    dispatcher: Callable[[Any], str] = spell_dispatcher()
     print(dispatcher(42))
     print(dispatcher("fireball"))
     spells: list[str] = ["1", "2", "3"]

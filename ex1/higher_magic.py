@@ -41,17 +41,21 @@ def poison(target: str, power: int) -> str:
     return f"Poison do {power} damage to {target}"
 
 
-def spell_combiner(spell1: Callable, spell2: Callable) -> Callable:
+def spell_combiner(
+    spell1: Callable[[str, int], str], spell2: Callable[[str, int], str]
+) -> Callable[[str, int], tuple[str, str]]:
     if not callable(spell1) or not callable(spell2):
         raise TypeError("Spell must be callable")
 
-    def combined(*args) -> tuple[str, str]:
-        return (spell1(*args), spell2(*args))
+    def combined(target: str, power: int) -> tuple[str, str]:
+        return (spell1(target, power), spell2(target, power))
 
     return combined
 
 
-def power_amplifier(base_spell: Callable, multiplier: int) -> Callable:
+def power_amplifier(
+    base_spell: Callable[[str, int], str], multiplier: int
+) -> Callable[[str, int], str]:
     if not callable(base_spell):
         raise TypeError("Base_spell must be callable")
     if not isinstance(multiplier, int):
@@ -75,29 +79,33 @@ def condition_test(power: int) -> bool:
     return False
 
 
-def conditional_caster(condition: Callable, spell: Callable) -> Callable:
+def conditional_caster(
+    condition: Callable[[int], bool], spell: Callable[[str, int], str]
+) -> Callable[[str, int], str]:
     if not callable(condition):
         raise TypeError("Condition must be callable")
     if not callable(spell):
         raise TypeError("Spell must be callable")
 
-    def casters(*args) -> str:
-        if condition(args[1]):
-            return spell(*args)
+    def casters(target: str, power: int) -> str:
+        if condition(power):
+            return spell(target, power)
         return "Spell fizzled"
 
     return casters
 
 
-def spell_sequence(spells: list[Callable]) -> Callable:
+def spell_sequence(
+    spells: list[Callable[[str, int], str]],
+) -> Callable[[str, int], list[str]]:
     for spell in spells:
         if not callable(spell):
             raise TypeError("All spells must be callable")
 
-    def sequence(*args) -> list[str]:
+    def sequence(target: str, power: int) -> list[str]:
         spell_list: list[str] = []
         for x in spells:
-            spell_list.append(x(*args))
+            spell_list.append(x(target, power))
         return spell_list
 
     return sequence
@@ -106,7 +114,9 @@ def spell_sequence(spells: list[Callable]) -> Callable:
 if __name__ == "__main__":
     print("Testing spell combiner...")
     try:
-        combiner: Callable = spell_combiner(poison, fire)
+        combiner: Callable[[str, int], tuple[str, str]] = spell_combiner(
+            poison, fire
+        )
         combined_spell: tuple[str, str] = combiner("Dragon", 67)
         print(
             f"Combined spell result: > Callable{combined_spell[0]}, "
@@ -117,22 +127,29 @@ if __name__ == "__main__":
 
     print("\nTesting power amplifier...")
     try:
-        amplifier: Callable = power_amplifier(fire, 9)
+        amplifier: Callable[[str, int], str] = power_amplifier(fire, 9)
         print(amplifier("goblin", 90))
     except Exception as e:
         print(e)
 
     print("\nTesting conditional caster...")
     try:
-        caster: Callable = conditional_caster(condition_test, freeze)
+        caster: Callable[[str, int], str] = conditional_caster(
+            condition_test, freeze
+        )
         print(caster("goblin", 3))
     except Exception as e:
         print(e)
 
     print("\nTesting spell sequence...")
     try:
-        spell_list: list[Callable] = [poison, fire, freeze, heal]
-        sequencer: Callable = spell_sequence(spell_list)
+        spell_list: list[Callable[[str, int], str]] = [
+            poison,
+            fire,
+            freeze,
+            heal,
+        ]
+        sequencer: Callable[[str, int], list[str]] = spell_sequence(spell_list)
         sequence: list[str] = sequencer("zombies", 54)
         for x in sequence:
             print(x)
